@@ -11,6 +11,8 @@ import re
 import string
 import sys
 
+from scalereg.reg6.forms import TicketForm, ItemForm, OrderForm, RegisterWizard
+
 DEBUG_LOGGING = False
 STEPS_TOTAL = 7
 
@@ -127,6 +129,13 @@ def index(request):
   avail_tickets = models.Ticket.public_objects.order_by('description')
   active_promocode_set = models.PromoCode.active_objects
   avail_promocodes = active_promocode_set.names()
+
+  context = {'tickets': avail_tickets}
+
+  return RegisterWizard([TicketForm, ItemForm, OrderForm]
+      )(request, extra_context=context)
+
+
 
   kiosk_mode = False
   promo_in_use = None
