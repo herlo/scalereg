@@ -4,14 +4,8 @@ from django.forms import ModelForm
 from django.forms import ValidationError
 from django.contrib.auth.models import User
 from django.contrib.formtools.wizard import FormWizard
-<<<<<<< HEAD:reg6/forms.py
-#from models import Ticket,Item,Order,Payment
-from models import Ticket,Item,Order
-
-=======
 from models import Ticket,Item,Order
 #,Payment
->>>>>>> 473b1ff581f6b4676609fb95863c8bffb0b4271a:reg6/forms.py
 
 class TicketForm(forms.ModelForm):
 
@@ -32,7 +26,6 @@ class OrderForm(forms.ModelForm):
         fields = ('first_name', 'last_name', 'email')
 
 #class PaymentForm(forms.ModelForm):
-<<<<<<< HEAD:reg6/forms.py
 
 #    class Meta: 
 #        model = Payment
@@ -46,9 +39,3 @@ class RegisterWizard(FormWizard):
 
 	def get_template(self, step):
 		return 'reg6/regWizard_%s.html' % step
-=======
-#
-#    class Meta: 
-#        model = Payment
-#        fields = ('first_name', 'last_name', 'email')
->>>>>>> 473b1ff581f6b4676609fb95863c8bffb0b4271a:reg6/forms.py
