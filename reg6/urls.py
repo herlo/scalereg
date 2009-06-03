@@ -1,23 +1,9 @@
 from django.conf.urls.defaults import *
+from scalereg.reg6.views import *
+from scalereg.reg6.forms import TicketForm, ItemForm, OrderForm, PaymentForm
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.formtools.wizard import FormWizard
 
-urlpatterns = patterns('',
-    (r'^$', 'scalereg.reg6.views.index'),
-    (r'^add_items/$', 'scalereg.reg6.views.AddItems'),
-    (r'^add_attendee/$', 'scalereg.reg6.views.AddAttendee'),
-    (r'^registered_attendee/$', 'scalereg.reg6.views.RegisteredAttendee'),
-    (r'^start_payment/$', 'scalereg.reg6.views.StartPayment'),
-    (r'^payment/$', 'scalereg.reg6.views.Payment'),
-    (r'^sale/$', 'scalereg.reg6.views.Sale'),
-    (r'^failed_payment/$', 'scalereg.reg6.views.FailedPayment'),
-    (r'^finish_payment/$', 'scalereg.reg6.views.FinishPayment'),
-    (r'^reg_lookup/$', 'scalereg.reg6.views.RegLookup'),
-    (r'^kiosk/$', 'scalereg.reg6.views.kiosk_index'),
-    (r'^checkin/$', 'scalereg.reg6.views.CheckIn'),
-    (r'^finish_checkin/$', 'scalereg.reg6.views.FinishCheckIn'),
-    (r'^redeem_coupon/$', 'scalereg.reg6.views.RedeemCoupon'),
-    (r'^add_coupon/$', 'scalereg.reg6.views.AddCoupon'),
-    (r'^checked_in/$', 'scalereg.reg6.views.CheckedIn'),
-    (r'^mass_add/$', 'scalereg.reg6.views.MassAdd'),
-    (r'^clear_badorder/$', 'scalereg.reg6.views.ClearBadOrder'),
-    (r'^staff/', include('scalereg.reg6.staff.urls')),
+urlpatterns = patterns('scalereg.reg6.views',
+    (r'^$', RegisterWizard([TicketForm, ItemForm, OrderForm, PaymentForm])),
 )
