@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/233/trunk/src/scale_templates/speaker_survey
+END
+survey_fill.html
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/233/trunk/src/scale_templates/speaker_survey/survey_fill.html
+END
+survey_index.html
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/!svn/ver/233/trunk/src/scale_templates/speaker_survey/survey_index.html
+END
+scores_index.html
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/!svn/ver/232/trunk/src/scale_templates/speaker_survey/scores_index.html
+END
+survey_lookup.html
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/!svn/ver/228/trunk/src/scale_templates/speaker_survey/survey_lookup.html
+END
+survey_view.html
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/233/trunk/src/scale_templates/speaker_survey/survey_view.html
+END
+scores_speaker.html
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/!svn/ver/232/trunk/src/scale_templates/speaker_survey/scores_speaker.html
+END
+error.html
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/226/trunk/src/scale_templates/speaker_survey/error.html
+END
+base.html
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/226/trunk/src/scale_templates/speaker_survey/base.html
+END

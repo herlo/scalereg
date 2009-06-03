@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/!svn/ver/233/trunk/src/speaker_survey
+END
+validators.py
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/!svn/ver/227/trunk/src/speaker_survey/validators.py
+END
+views.py
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/233/trunk/src/speaker_survey/views.py
+END
+__init__.py
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/226/trunk/src/speaker_survey/__init__.py
+END
+models.py
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/227/trunk/src/speaker_survey/models.py
+END
+urls.py
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svn/!svn/ver/233/trunk/src/speaker_survey/urls.py
+END
