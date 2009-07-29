@@ -80,11 +80,10 @@ class Endpoint:
     httplib.HTTPConnection.debuglevel = 1
 
     def do_post(self, url, args):
-        for i in [1,2,3,4,5]:
-            try
-                return urllib.urlopen(url, urllib.urlencode(args)).read()
-            except socket.error: 
-                pass
+        try
+            return urllib.urlopen(url, urllib.urlencode(args)).read()
+        except socket.error: 
+            pass
 
     def verify(self, data):
             	logging.debug("verify function")
