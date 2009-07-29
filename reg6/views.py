@@ -761,7 +761,8 @@ class HandleIPN(Endpoint):
     logging.debug("Temp Order Total: %s", temp_order.total())
     
     # Check the PayPal order data against our own
-    if data.get('mc_gross') != str(temp_order.total().quantize(decimal.Decimal(’.01′))):
+    temporder_total = temp_order.total().quantize(decimal.Decimal(’.01′))
+    if data.get('mc_gross') != str(temporder_total):
         raise HandleIPN.OrderMismatch(
             "The details for order %s don't match our database." % data.get('txn_id'))
     
