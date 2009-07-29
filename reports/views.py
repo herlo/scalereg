@@ -8,8 +8,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import loader
 from django.views.generic.list_detail import object_list as django_object_list
-from scalereg.auth_helper.models import Service
-from scalereg.reg6 import models
+from scale.auth_helper.models import Service
+from scale.reg6 import models
 import datetime
 import inspect
 import re
@@ -46,8 +46,7 @@ class Count:
     self.percentage = 0
 
   def CalcPercentage(self, total):
-    if (self.count > 0 and float(total) > 0):
-      self.percentage = 100 * round(self.count / float(total), 3)
+    self.percentage = 100 * round(self.count / float(total), 3)
 
 
 class Attendee(Count):

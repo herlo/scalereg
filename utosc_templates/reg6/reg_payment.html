@@ -1,0 +1,103 @@
+{% extends "reg6/reg.html" %}
+{% load i18n %}
+{% load reg6_filters %}
+{% block content %}
+<div id="content-main">
+
+{% if attendees and total %}
+    <br />
+    <h2>
+    You are paying for the following attendee(s):
+    </h2>
+
+    <p>
+    <table border="1">
+    <thead>
+    <tr>
+    <th>Registration Number</th>
+    <th>Name</th>
+    <th>Email</th>
+    <th>Amount</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for person  in attendees %}
+    <tr>
+        <td>{{ person.id|escape }}</td>
+        <td>{{ person.first_name|escape }} {{ person.last_name|escape }}</td>
+        <td>{{ person.email|escape }}</td>
+        <td>{{ person.ticket_cost|money|escape }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+    </p>
+
+    <p>
+    Total: {{ total|money|escape }}
+    </p>
+
+    <h2>Payment</h2>
+<!--
+            	<form method="POST" action="https://sandbox.google.com/api/checkout/v2/checkoutForm/Merchant/739947327946302" accept-charset="utf-8">
+            		
+            		<input type="hidden" name="item_name_1" value="UTOSC 2009 Registration"/>
+                    <input type="hidden" name="item_description_1" value="Order Number: {{ order|escape }}" />
+            		<input type="hidden" name="item_quantity_1" value="1" />
+                    <input type="hidden" name="item_price_1" value="{{ total|escape }}" />
+            		<input type="hidden" name="item_currency_1" value="USD"/>
+                    <input type="hidden" name="item_merchant_id_1" value="941111280163397"/>
+            		<input type="hidden" name="_charset_"/>
+            		<input type="image" name="Google Checkout" alt="Fast checkout through Google" src="http://sandbox.google.com/checkout/buttons/checkout.gif?merchant_id=739947327946302&w=180&h=46&style=white&variant=text&loc=en_US" height="46" width="180"/>
+                </form>
+            </td>
+-->
+
+    <form action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post" /> 
+        <!-- Identify your business so that you can collect the payments. --> 
+        <input type="hidden" name="business" value="herlo_1248048461_biz@utos.org" /> 
+        <!-- Specify a Buy Now button. --> 
+        <input type="hidden" name="cmd" value="_xclick" /> 
+        <input type="hidden" name="hosted_button_id" value="6782022">
+        <!-- Specify details about the item that buyers will purchase. --> 
+        <input type="hidden" name="item_name" value="Registration for Utah Open Source Conference 2009" /> 
+        <input type="hidden" name="item_number" value="UTOSC2009REG" /> 
+        <input type="hidden" name="invoice" value="{{ order|escape }}" />
+        <input type="hidden" name="amount" value="{{ total|escape|money }}" /> 
+        <input type="hidden" name="currency_code" value="USD" /> 
+        <input type="hidden" name="return" value="http://register.utosc.com:8081/reg6/finish_payment/" />
+		<input type="hidden" name="rm" value="2" />
+		<input type="hidden" name="at" value="AKB88DoQ0OKJ.KTFhJtRA4EBn15AA1QcUkTkjQjGEHvBm8v9IMLoBONm" />
+        <input type="hidden" name="cancel_return" value="http://register.utosc.com:8081/reg6/" />
+        <!-- Display the payment button. --> 
+        <input type="image" name="submit" border="0" src="https://www.paypal.com/images/x-click-but6.gif" alt="PayPal - The safer, easier way to pay online"> <img alt="" border="0" width="1" height="1" src="https://www.paypal.com/en_US/i/scr/pixel.gif" />
+    </form>
+
+    <h2>Pay With A Coupon:</h2>
+
+    <p>
+    If you have a coupon to redeem, please enter the code below:
+    </p>
+
+    <form method="post" action="../redeem_coupon/">
+    <p>
+    <input type="text" name="code" maxlength="15">
+    <input type="hidden" name="order" value="{{ order|escape }}">
+    <input type="submit" value="Redeem" />
+    </p>
+    </form>
+
+    <h2>Other Options:</h2>
+
+    <form method="post" action="../">
+    <p>
+    <input type="submit" value="Start Over" />
+    </p>
+    </form>
+{% else %}
+    <h2>Not Enough Information</h2>
+{% endif %}
+
+</div>
+{% endblock %}
+

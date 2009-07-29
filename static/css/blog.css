@@ -1,0 +1,62 @@
+.blogEntry
+{
+  position: absolute;
+  left: 50px;
+	border-top: dashed 1px #dfdfdf;
+	border-right:  dashed 1px #dfdfdf;
+	border-left: dashed 1px #dfdfdf;
+	border-bottom: dashed 1px #dfdfdf;
+	padding-top: 1em;
+	padding-right: 1em;
+	padding-bottom: 1em;
+}
+
+.blogUserProfile
+{
+	float: left;
+	display: inline;
+	padding: 1em;
+	max-width: 150px;
+}
+
+
+.blogUserImage
+{
+	max-width: 150px;
+	max-height: 200px;
+}
+
+.blogFullName
+{ 
+  align:  top;
+	font-size: 12pt;
+}
+
+.blogEntryTitle
+{
+	font-size: 18pt; 
+}
+
+.blogUserEmail
+{ 
+	
+}
+
+.blogTags
+{
+display: inline;
+text-align: right;
+font: 12pt; 
+padding-left: .25em;
+}
+
+.blogCreatedDate
+{ 
+	padding-left: .25em;
+}
+
+.blogText
+{ 
+	padding: .5em;
+}
+

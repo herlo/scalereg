@@ -1,17 +1,21 @@
 # Create your views here.
 
 from django import forms
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.core.mail import send_mail, mail_managers
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
 from django.shortcuts import render_to_response
+
 import datetime
-import models
 import random
 import re
 import string
 import sys
 
-from scalereg.reg6.forms import TicketForm, ItemForm, OrderForm, RegisterWizard
+from scale.paypal import Endpoint
+
+import models # relative import
 
 DEBUG_LOGGING = False
 STEPS_TOTAL = 7
@@ -130,13 +134,6 @@ def index(request):
   active_promocode_set = models.PromoCode.active_objects
   avail_promocodes = active_promocode_set.names()
 
-  context = {'tickets': avail_tickets}
-
-  return RegisterWizard([TicketForm, ItemForm, OrderForm]
-      )(request, extra_context=context)
-
-
-
   kiosk_mode = False
   promo_in_use = None
   if request.method == 'GET':
@@ -164,6 +161,11 @@ def index(request):
      'steps_total': STEPS_TOTAL,
     })
 
+def clear_kiosk(request):
+    if request.session.get('kiosk', None) != None:
+        del request.session['kiosk']
+
+    return HttpResponseRedirect("/reg6/")
 
 def kiosk_index(request):
   response = HttpResponse()
@@ -182,7 +184,7 @@ def kiosk_index(request):
   <td valign="top">
   <form method="get" action="../checkin/">
   <input type="submit" value="&nbsp;&nbsp;Check In&nbsp;&nbsp;">
-  <input type="hidden" name="kiosk" value="1">
+  <input type="hidden" name="kiosk" value="0">
   </form>
   </td>
   <td valign="top">
@@ -194,7 +196,7 @@ def kiosk_index(request):
   <td valign="top">
   <form method="get" action="../">
   <input type="submit" value="Registration">
-  <input type="hidden" name="kiosk" value="1">
+  <input type="hidden" name="kiosk" value="0">
   </form>
   </td>
   <td valign="top">If you have not registered with SCALE.</td>
@@ -296,6 +298,8 @@ def AddAttendee(request):
           questions.append(q)
           break
 
+  manipulator = models.Attendee.AddManipulator()
+
   if action == 'add':
     errors = new_data = {}
   else:
@@ -322,22 +326,34 @@ def AddAttendee(request):
           continue
         new_data.appendlist('answers', request.POST[i])
 
-    if not request.session.test_cookie_worked():
+    try:
+      errors = manipulator.get_validation_errors(new_data)
+    except: # FIXME sometimes we get an exception, not sure how to reproduce
       return scale_render_to_response(request, 'reg6/reg_error.html',
         {'title': 'Registration Problem',
-         'error_message': 'Please do not register multiple attendees at the same time. Please make sure you have cookies enabled.',
+         'error_message': 'An unexpected error occurred, please try again.'
         })
-    request.session.delete_test_cookie()
+    if not errors:
+      if not request.session.test_cookie_worked():
+        return scale_render_to_response(request, 'reg6/reg_error.html',
+          {'title': 'Registration Problem',
+           'error_message': 'Please do not register multiple attendees at the same time. Please make sure you have cookies enabled.',
+          })
+      request.session.delete_test_cookie()
+      manipulator.do_html2python(new_data)
+      new_place = manipulator.save(new_data)
+      request.session['attendee'] = new_place.id
 
-    # add attendee to order
-    if 'payment' not in request.session:
-      request.session['payment'] = [new_place.id]
-    else:
-      request.session['payment'].append(new_place.id)
+      # add attendee to order
+      if 'payment' not in request.session:
+        request.session['payment'] = [new_place.id]
+      else:
+        request.session['payment'].append(new_place.id)
 
-    return HttpResponseRedirect('/reg6/registered_attendee/')
+      return HttpResponseRedirect('/reg6/registered_attendee/')
 
-  return render_to_response(request, 'reg6/reg_attendee.html',
+  form = forms.FormWrapper(manipulator, new_data, errors)
+  return scale_render_to_response(request, 'reg6/reg_attendee.html',
     {'title': 'Register Attendee',
      'ticket': ticket[0],
      'promo': promo_name,
@@ -522,8 +538,8 @@ def Sale(request):
   if request.method != 'POST':
     ScaleDebug('not POST')
     return HttpResponseServerError('not POST')
-#  if 'HTTP_REFERER' in request.META:
-#    print request.META['HTTP_REFERER']
+  if 'HTTP_REFERER' in request.META:
+    print request.META['HTTP_REFERER']
 #  if 'HTTP_REFERER' not in request.META  or \
 #    '/reg6/start_payment/' not in request.META['HTTP_REFERER']:
 #    return HttpResponseRedirect('/reg6/')
@@ -532,20 +548,20 @@ def Sale(request):
   ScaleDebug(request.POST)
 
   required_vars = [
-    'NAME',
-    'ADDRESS',
-    'CITY',
-    'STATE',
-    'ZIP',
-    'COUNTRY',
-    'PHONE',
-    'EMAIL',
-    'AMOUNT',
-    'AUTHCODE',
-    'RESULT',
-    'RESPMSG',
-    'USER1',
-    'USER2',
+      'NAME',
+      'ADDRESS',
+      'CITY',
+      'STATE',
+      'ZIP',
+      'COUNTRY',
+      'PHONE',
+      'EMAIL',
+      'AMOUNT',
+      'AUTHCODE',
+      'RESULT',
+      'RESPMSG',
+      'USER1',
+      'USER2',
   ]
 
   r = CheckVars(request, required_vars, [])
@@ -640,10 +656,10 @@ def FinishPayment(request):
 #    return HttpResponseRedirect('/reg6/')
 
   required_vars = [
-    'NAME',
-    'EMAIL',
-    'AMOUNT',
-    'USER1',
+    'address_name',
+    'payer_email',
+    'mc_gross',
+    'invoice', 
   ]
 
   r = CheckVars(request, required_vars, [])
@@ -651,23 +667,134 @@ def FinishPayment(request):
     return r
 
   try:
-    order = models.Order.objects.get(order_num=request.POST['USER1'])
+    print "Invoice: " + request.POST['invoice']
+    order = models.Order.objects.get(order_num=request.POST['invoice'])
+    all_attendees_data = models.Attendee.objects.filter(order=order.order_num)
   except models.Order.DoesNotExist:
-    ScaleDebug('Your order cannot be found')
-    return HttpResponseServerError('Your order cannot be found')
+    try:
+        order = models.TempOrder.objects.get(order_num=request.POST['invoice'])
+        attendee_list = order.attendees_list()
+        all_attendees_data = list()
+        for attendee in attendee_list:
+            print "attendee: " + str(attendee)
+            all_attendees_data.append(models.Attendee.objects.get(id=attendee))
+    except models.TempOrder.DoesNotExist:
+        ScaleDebug('Your order cannot be found')
+        return HttpResponseServerError('Your order cannot be found')
 
-  all_attendees_data = models.Attendee.objects.filter(order=order.order_num)
 
   return scale_render_to_response(request, 'reg6/reg_receipt.html',
     {'title': 'Registration Payment Receipt',
-     'name': request.POST['NAME'],
-     'email': request.POST['EMAIL'],
+     'name': request.POST['address_name'],
+     'email': request.POST['payer_email'],
      'attendees': all_attendees_data,
-     'order': request.POST['USER1'],
+     'order': request.POST['invoice'],
      'step': PAYMENT_STEP,
      'steps_total': STEPS_TOTAL,
-     'total': request.POST['AMOUNT'],
+     'total': request.POST['mc_gross'],
     })
+
+
+class HandleIPN(Endpoint):
+  """Handle IPN messages sent from PayPal once a user completes payment."""
+  class PayPalException(Exception):
+
+    def __init__(self, message):
+          self.message = message
+
+          mail_managers('PayPal IPN Error!', """The site encountered the
+          following error with a PayPal IPN message. Please investigate.
+
+          %s""" % message)
+
+    def __str__(self):
+      return repr(self.message)
+
+  class InvalidPayPalResponse(PayPalException):
+    """Raise this when PayPal returns an error. This is *not* the same as a
+    failed credit card number/address/other-data, this is some kind of
+    programmatic error.
+
+    """
+    pass
+
+  class OrderUnknown(PayPalException):
+    """Raise this when PayPal notifies us of an order that is not in our DB."""
+    pass
+
+  class OrderMismatch(PayPalException):
+    """Raise this when PayPal notifies us of an order we know about, but the
+    data doesn't match up.
+
+    """
+    pass
+
+  def process(self, data):
+    """Notification from PayPal that the transaction went through, didn't go
+    through, or may be going through later.
+
+    It is important to double-check the price, txn_id, payer_email, and any
+    other important data coming from PayPal to make sure that no tampering has
+    been done since we first sent the user off to PayPal.
+
+    We should update the existing entry in the database and email the user
+    that the registration payment is complete.
+
+    """
+
+    try:
+      temp_order = models.TempOrder.objects.get(order_num=data.get('txn_id'))
+    except models.TempOrder.DoesNotExist:
+      raise HandleIPN.OrderUnknown("PayPal sent notification of an order from "\
+          "%s that we do not have a record of." % data.get('payer_email'))
+
+    # Check the PayPal order data against our own
+    if data.get('mc_gross') != str(temp_order.total()):
+      raise OrderMismatch(
+        "The details for order %s don't match our database." % data.get('txn_id'))
+
+    if data.get('payment_status') == 'Completed':
+      # Looks ok, make a real order and notify the user
+      obj_dict = {
+        'order_num': data.get('txn_id'),
+        'name': " ".join([data.get('first_name'), data.get('last_name')]),
+        'address':  '',
+        'city': '',
+        'state': '',
+        'zip': '',
+        'country': '',
+        'email': data.get('payer_email'),
+        'phone': '',
+        'amount': data.get('mc_gross'),
+        'payment_type': 'paypal',
+      }
+
+      order = models.Order.objects.create(**obj_dict)
+
+      send_mail('Your order is complete', """Congrats, your registration is
+        complete, payed for, and we love you (now).""",
+        settings.DEFAULT_FROM_EMAIL, [data.get('payer_email')])
+
+    elif data.get('payment_status') == 'Failed':
+      # Notify the user that payment did not go through
+      send_mail('Your order is not complete', """Crap! There was a problem
+          processing your order, please log in and try again.""",
+          settings.DEFAULT_FROM_EMAIL, [data.get('payer_email')])
+
+    elif data.get('payment_status') == 'Pending':
+      # We don't care, PayPal will send another message when it's done
+      pass
+
+    return HttpResponse("Ok")
+
+  def process_invalid(self, data):
+    """Something bad and unexpected happened; PayPal was hacked, alien
+    invasion forces are interfering with the signal, this IPN postback code
+    doesn't work, etc.  This will require manual investigation.
+
+    """
+    # This should probably be logged somewhere with the ``data`` dictionary
+    raise HandleIPN.InvalidPayPalResponse("Something is borked: " + str(data))
 
 
 def RegLookup(request):

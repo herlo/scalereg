@@ -1,30 +1,30 @@
-#from django.core import Exception
+from django.core import validators
 import models
 import string
 
 def isValidStartStopDates(field_data, all_data):
   if all_data['start_date'] and all_data['end_date']:
     if all_data['start_date'] > all_data['end_date']:
-      raise Exception('Start date greater than End date')
+      raise validators.ValidationError('Start date greater than End date')
 
 
 def isPositive(field_data, all_data):
   if float(field_data) <= 0:
-    raise Exception('Value should be positive')
+    raise validators.ValidationError('Value should be positive')
 
 
 def isNotNegative(field_data, all_data):
   if float(field_data) < 0:
-    raise Exception('Value should not be negative')
+    raise validators.ValidationError('Value should not be negative')
 
 
 def isValidObtainedItems(field_data, all_data):
   obtained_items = {}
   for f in field_data.replace(' ', '').split(','):
     if not f:
-      raise Exception('Value cannot be parsed')
+      raise validators.ValidationError('Value cannot be parsed')
     if f in obtained_items:
-      raise Exception('Item listed twice')
+      raise validators.ValidationError('Item listed twice')
     obtained_items[f] = None
 
   obj = models.Attendee.objects.get(id=all_data['id'])
@@ -39,44 +39,44 @@ def isValidObtainedItems(field_data, all_data):
       plural = 's'
     else:
       plural = ''
-    raise Exception('Item%s not found: %s' %
+    raise validators.ValidationError('Item%s not found: %s' %
       (plural, invalid_items))
 
 
 def isAllCaps(field_data, all_data):
   for f in field_data:
     if f not in string.ascii_uppercase:
-      raise Exception('Value must be all upper-case')
+      raise validators.ValidationError('Value must be all upper-case')
 
 
 def isAllCapsDigits(field_data, all_data):
   valid_letters = string.ascii_uppercase + string.digits
   for f in field_data:
     if f not in valid_letters:
-      raise Exception('Value must be all upper-case / digits')
+      raise validators.ValidationError('Value must be all upper-case / digits')
 
 
 def isValidOrderNumber(field_data, all_data):
   if len(field_data) != 10:
-    raise Exception('Value must be exactly 10 digits')
+    raise validators.ValidationError('Value must be exactly 10 digits')
   isAllCapsDigits(field_data, all_data)
 
 
 def isValidAttendeeCheckin(field_data, all_data):
   if field_data == 'on':
     if 'valid' not in all_data:
-      raise Exception('Cannot check in invalid attendee')
+      raise validators.ValidationError('Cannot check in invalid attendee')
 
 
 def isCommaSeparatedInts(field_data, all_data):
   csv = field_data.split(',')
   if not csv:
-    raise Exception('No data')
+    raise validators.ValidationError('No data')
   try:
     for f in csv:
       int(f)
   except ValueError:
-    raise Exception('Not a number')
+    raise validators.ValidationError('Not a number')
 
 
 def isQuestionsUnique(field_data, all_data):
@@ -84,5 +84,5 @@ def isQuestionsUnique(field_data, all_data):
   for id in field_data:
     answer = models.Answer.objects.get(id=id)
     if answer.question in questions:
-      raise Exception('Question cannot have multiple answers')
+      raise validators.ValidationError('Question cannot have multiple answers')
     questions.append(answer.question)

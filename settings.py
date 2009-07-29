@@ -1,4 +1,4 @@
-# Django settings for scalereg project.
+# Django settings for scale project.
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -18,7 +18,7 @@ DATABASE_PORT = ''             # Set to empty string for default. Not used with 
 
 # Local time zone for this installation. All choices can be found here:
 # http://www.postgresql.org/docs/current/static/datetime-keywords.html#DATETIME-TIMEZONE-SET-TABLE
-TIME_ZONE = 'America/Chicago'
+TIME_ZONE = 'America/Denver'
 
 # Language code for this installation. All choices can be found here:
 # http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes
@@ -29,11 +29,11 @@ SITE_ID = 1
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = ''
+MEDIA_ROOT = '/static/'
 
 # URL that handles the media served from MEDIA_ROOT.
 # Example: "http://media.lawrence.com"
-MEDIA_URL = ''
+MEDIA_URL = 'static/'
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
@@ -41,7 +41,8 @@ MEDIA_URL = ''
 ADMIN_MEDIA_PREFIX = '/media/'
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'sx&ohty^k1rg2x35(thpze!+7l+t=5_dvs2_2)dw_a!mq(26(%'
+#SECRET_KEY = 'sx&ohty^k1rg2x35(thpze!+7l+t=5_dvs2_2)dw_a!mq(26(%'
+SECRET_KEY = '7rqvt(b923s8r^*^==u+ce@5d2)7@oziv+*k(!++lg#j29$%h#'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -57,11 +58,12 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.doc.XViewMiddleware',
 )
 
-ROOT_URLCONF = 'scalereg.urls'
+ROOT_URLCONF = 'scale.urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates".
     # Always use forward slashes, even on Windows.
+    "utosc_templates",
     "scale_templates",
 )
 
@@ -71,10 +73,10 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
-    'scalereg.auth_helper',
-    'scalereg.reg6',
-    'scalereg.reports',
-    'scalereg.speaker_survey',
+    'scale.auth_helper',
+    'scale.reg6',
+    'scale.reports',
+    'scale.speaker_survey',
 )
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True

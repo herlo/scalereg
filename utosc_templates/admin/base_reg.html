@@ -1,0 +1,116 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!--
+	Modded out by Adam Barrett <admin@utahcon.com>
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<title>UTOSC 2009 | (Afford|Scal|Reli)Ability - {% block title %}{% endblock title %}</title>
+	<meta name="keywords" content="" />
+	<meta name="description" content="" />
+	<link href="/static/css/default.css" rel="stylesheet" type="text/css" />
+	{% block additionalCSS %}
+ 	{% endblock additionalCSS %}
+	<script type="text/javascript" src="/static/js/jquery-1.2.2.min.js"></script>
+	<script type="text/javascript" src="/static/js/jquery-passwordstrength.min.1.1.js"></script>
+	<script type="text/javascript" src="/static/js/jquery-autoexpand.1.02.js"></script>
+	{% block additionalJS %}
+ 	{% endblock additionalJS %}
+</head>
+{% load i18n %}
+
+{% if not kiosk %}
+<body>
+<div class="bigpicture">
+	<div class="masthead">
+		<img style="float:right;" src="/static/img/utosLogo.png" alt="UTOS logo" />
+        <div class="clearboth"></div>
+		<div class="titlebar">
+			<img src="/static/img/utosTitle.png" alt="Utah Open Source" />
+		</div>
+		<div class="menubar_left">
+	<div class="menubutton_left"><a href="http://2009.utosc.com/pages/home/">HOME</a></div>
+	<div class="menubutton_left"><a href="http://2009.utosc.com/pages/about/">ABOUT</a></div>
+	<div class="menubutton_left"><a href="http://2009.utosc.com/speaker/list/all/">ABSTRACTS</a></div>
+	<div class="menubutton_left"><a href="/reg6/">REGISTER</a></div>
+	<div class="menubutton_left"><a href="http://2009.utosc.com/sponsor/list/">SPONSORS</a></div>
+	<div class="menubutton_left"><a href="http://2009.utosc.com/pages/events/">EVENTS</a></div>
+	<div class="menubutton_left"><a href="http://2009.utosc.com/pages/lodgingdining/">LODGING / DINING</a></div>
+	<div class="menubutton_left"><a href="http://2009.utosc.com/pages/venue/">VENUE</a></div>
+	<div class="menubutton_left"><a href="http://2009.utosc.com/speaker/schedule/"> SCHEDULE</a></div>
+		</div>
+	</div>
+	<!-- eo:masthead -->
+
+    <div class="clearboth"></div>
+
+	<div class="bigbluebox">
+		<div class="bbbleft">
+			<img src="/static/img/utosc2009_2_sm.png" alt="" />
+		</div>
+		<div class="bbbmiddle">
+			<p>Registration is now open.  For more details, <a href="http://2009.utosc.com/pages/registration/">click here</a>.</p>
+			<p><a href="/reg6/">Click here to register</a>.</p>
+		</div>
+		<div class="bbbright">
+			Hosted by:<br />
+			<img src="/static/img/slcc_logo_4clr_75x200.jpg" alt="" /><br />
+			Miller Free Enterprise Center (MFEC)<br />
+			Sandy, Utah
+		</div>
+	</div>
+
+{% endif %}
+
+        {% if messages %}
+        <ul class="messagelist">{% for message in messages %}<li>{{ message|escape }}</li>{% endfor %}</ul>
+        {% endif %}
+
+	<!-- scale stuff -->
+
+<!--
+		<ul>
+            <li class="home"><a href="http://www.socallinuxexpo.org/scale6x"><strong>Home</strong></a></li>
+            <li class="purchase_tickets"><a href="http://www.socallinuxexpo.org/scale6x/registration/"><strong>Purchase Tickets</strong></a></li>
+            <li class="conference_info">
+                <a href="http://www.socallinuxexpo.org/scale6x/conference-info/speakers/"><strong>Conference Info</strong></a>
+
+                <ul class="drop_down">
+                    <li><a href="http://socallinuxexpo.com/blog/">SCALE Blog</a></li>
+                    <li><a href="http://www.socallinuxexpo.org/scale6x/conference-info/calls-for-papers/">Calls For Papers</a></li>
+                    <li><a href="http://www.socallinuxexpo.org/scale6x/conference-info/location/">Location</a></li>
+                    <li><a href="http://www.socallinuxexpo.org/scale6x/conference-info/speakers/">Featured Speakers</a></li>
+                    <li><a href="http://www.socallinuxexpo.org/scale6x/conference-info/exhibitions/">Exhibitions</a></li>
+
+                    <li><a href="http://www.socallinuxexpo.org/scale6x/conference-info/sponsors/">Sponsors</a></li>
+                    <li><a href="http://www.socallinuxexpo.org/scale6x/conference-info/social-events/">Social Events</a></li>
+                    <li><a href="http://www.socallinuxexpo.org/scale6x/conference-info/committees/">Committees</a></li>
+                </ul>
+            </li>
+            <li class="media"><a href="http://www.socallinuxexpo.org/scale6x/press-release/"><strong>Media</strong></a></li>
+            <li class="open_source_health_care_summit"><a href="http://www.socallinuxexpo.org/scale6x/conference-info/social-events/scale-friday-special-events/"><strong>SCALE Friday Special Events</strong></a></li>
+
+		</ul>
+-->
+		<div class="contentbox">
+
+			<div class="centercontent">
+		        {% block pretitle %}{% endblock %}
+		        {% block content_title %}{% if title %}<h1>{{ title|escape }}</h1>{% endif %}{% endblock %}
+		        {% block breadcrumbs %}<div class="breadcrumbs"></div>{% endblock %}
+		        {% block content %}{{ content }}{% endblock %}
+		        <br class="clear" />
+		    </div>
+
+		</div>
+
+{% if not kiosk %}
+		<div class="footer">
+			<span><em>UTOSC 2009:</em> Copyright 2007-2009 Utah Open Source Conference. All Rights Reserved.</span>
+		</div>
+	</div>
+</div>
+{% endif %}
+
+</body>
+</html>
