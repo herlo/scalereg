@@ -17,6 +17,15 @@ from scale.paypal import Endpoint
 
 import models # relative import
 
+import logging
+
+logging.basicConfig(
+    level = logging.DEBUG,
+    format = '%(asctime)s %(levelname)s %(message)s',
+    filename = '/tmp/scalereg.log',
+    filemode = 'w'
+)
+
 DEBUG_LOGGING = False
 STEPS_TOTAL = 7
 
@@ -732,59 +741,62 @@ class HandleIPN(Endpoint):
   def process(self, data):
     """Notification from PayPal that the transaction went through, didn't go
     through, or may be going through later.
-
+    
     It is important to double-check the price, txn_id, payer_email, and any
     other important data coming from PayPal to make sure that no tampering has
     been done since we first sent the user off to PayPal.
-
+    
     We should update the existing entry in the database and email the user
     that the registration payment is complete.
-
+    
     """
-
+    
     try:
-      temp_order = models.TempOrder.objects.get(order_num=data.get('txn_id'))
+        temp_order = models.TempOrder.objects.get(order_num=data.get('txn_id'))
     except models.TempOrder.DoesNotExist:
-      raise HandleIPN.OrderUnknown("PayPal sent notification of an order from "\
-          "%s that we do not have a record of." % data.get('payer_email'))
+        raise HandleIPN.OrderUnknown("PayPal sent notification of an order from "\
+            "%s that we do not have a record of." % data.get('payer_email'))
 
+    logging.debug("Order Data: %s", data)
+    logging.debug("Temp Order Total: %s", temp_order.total())
+    
     # Check the PayPal order data against our own
-    if data.get('mc_gross') != str(temp_order.total()):
-      raise OrderMismatch(
-        "The details for order %s don't match our database." % data.get('txn_id'))
-
+    if data.get('mc_gross') != str(temp_order.total().quantize(decimal.Decimal(’.01′))):
+        raise HandleIPN.OrderMismatch(
+            "The details for order %s don't match our database." % data.get('txn_id'))
+    
     if data.get('payment_status') == 'Completed':
       # Looks ok, make a real order and notify the user
-      obj_dict = {
-        'order_num': data.get('txn_id'),
-        'name': " ".join([data.get('first_name'), data.get('last_name')]),
-        'address':  '',
-        'city': '',
-        'state': '',
-        'zip': '',
-        'country': '',
-        'email': data.get('payer_email'),
-        'phone': '',
-        'amount': data.get('mc_gross'),
-        'payment_type': 'paypal',
-      }
-
-      order = models.Order.objects.create(**obj_dict)
-
-      send_mail('Your order is complete', """Congrats, your registration is
-        complete, payed for, and we love you (now).""",
-        settings.DEFAULT_FROM_EMAIL, [data.get('payer_email')])
-
+        obj_dict = {
+            'order_num': data.get('txn_id'),
+            'name': " ".join([data.get('first_name'), data.get('last_name')]),
+            'address':  '',
+            'city': '',
+            'state': '',
+            'zip': '',
+            'country': '',
+            'email': data.get('payer_email'),
+            'phone': '',
+            'amount': data.get('mc_gross'),
+            'payment_type': 'paypal',
+        }
+    
+        order = models.Order.objects.create(**obj_dict)
+        
+        send_mail('Your order is complete', """Congrats, your registration is
+            complete, payed for, and we love you (now).""",
+            settings.DEFAULT_FROM_EMAIL, [data.get('payer_email')])
+    
     elif data.get('payment_status') == 'Failed':
-      # Notify the user that payment did not go through
-      send_mail('Your order is not complete', """Crap! There was a problem
-          processing your order, please log in and try again.""",
-          settings.DEFAULT_FROM_EMAIL, [data.get('payer_email')])
-
+        # Notify the user that payment did not go through
+        send_mail('Your order is not complete', """Crap! There was a problem
+            processing your order, please log in and try again.""",
+        settings.DEFAULT_FROM_EMAIL, [data.get('payer_email')])
+    
     elif data.get('payment_status') == 'Pending':
-      # We don't care, PayPal will send another message when it's done
-      pass
-
+        # We don't care, PayPal will send another message when it's done
+        pass
+    
     return HttpResponse("Ok")
 
   def process_invalid(self, data):
