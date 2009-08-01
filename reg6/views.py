@@ -174,7 +174,7 @@ def clear_kiosk(request):
     if request.session.get('kiosk', None) != None:
         del request.session['kiosk']
 
-    return HttpResponseRedirect("/reg6/")
+    return HttpResponseRedirect("/utoscreg/")
 
 def kiosk_index(request):
   response = HttpResponse()
@@ -220,10 +220,10 @@ def kiosk_index(request):
 
 def AddItems(request):
   if request.method != 'POST':
-    return HttpResponseRedirect('/reg6/')
+    return HttpResponseRedirect('/utoscreg/')
   if 'HTTP_REFERER' not in request.META or \
-    '/reg6/' not in request.META['HTTP_REFERER']:
-    return HttpResponseRedirect('/reg6/')
+    '/utoscreg/' not in request.META['HTTP_REFERER']:
+    return HttpResponseRedirect('/utoscreg/')
 
   required_vars = ['promo', 'ticket']
   r = CheckVars(request, required_vars, [])
@@ -255,17 +255,17 @@ def AddItems(request):
 
 def AddAttendee(request):
   if request.method != 'POST':
-    return HttpResponseRedirect('/reg6/')
+    return HttpResponseRedirect('/utoscreg/')
 
   action = None
   if 'HTTP_REFERER' in request.META:
-    if '/reg6/add_items/' in request.META['HTTP_REFERER']:
+    if '/utoscreg/add_items/' in request.META['HTTP_REFERER']:
       action = 'add'
-    elif '/reg6/add_attendee/' in request.META['HTTP_REFERER']:
+    elif '/utoscreg/add_attendee/' in request.META['HTTP_REFERER']:
       action = 'check'
 
   if not action:
-    return HttpResponseRedirect('/reg6/')
+    return HttpResponseRedirect('/utoscreg/')
 
   required_vars = ['ticket', 'promo']
   r = CheckVars(request, required_vars, [])
@@ -359,7 +359,7 @@ def AddAttendee(request):
       else:
         request.session['payment'].append(new_place.id)
 
-      return HttpResponseRedirect('/reg6/registered_attendee/')
+      return HttpResponseRedirect('/utoscreg/registered_attendee/')
 
   form = forms.FormWrapper(manipulator, new_data, errors)
   return scale_render_to_response(request, 'reg6/reg_attendee.html',
@@ -377,10 +377,10 @@ def AddAttendee(request):
 
 def RegisteredAttendee(request):
   if request.method != 'GET':
-    return HttpResponseRedirect('/reg6/')
+    return HttpResponseRedirect('/utoscreg/')
   if 'HTTP_REFERER' not in request.META  or \
-    '/reg6/add_attendee/' not in request.META['HTTP_REFERER']:
-    return HttpResponseRedirect('/reg6/')
+    '/utoscreg/add_attendee/' not in request.META['HTTP_REFERER']:
+    return HttpResponseRedirect('/utoscreg/')
 
   required_cookies = ['attendee']
   r = CheckVars(request, [], required_cookies)
@@ -485,10 +485,10 @@ def Payment(request):
   PAYMENT_STEP = 6
 
   if request.method != 'POST':
-    return HttpResponseRedirect('/reg6/')
+    return HttpResponseRedirect('/utoscreg/')
   if 'HTTP_REFERER' not in request.META  or \
-    '/reg6/start_payment/' not in request.META['HTTP_REFERER']:
-    return HttpResponseRedirect('/reg6/')
+    '/utoscreg/start_payment/' not in request.META['HTTP_REFERER']:
+    return HttpResponseRedirect('/utoscreg/')
 
   required_cookies = ['payment']
   r = CheckVars(request, [], required_cookies)
@@ -549,9 +549,9 @@ def Sale(request):
     return HttpResponseServerError('not POST')
   if 'HTTP_REFERER' in request.META:
     print request.META['HTTP_REFERER']
-#  if 'HTTP_REFERER' not in request.META  or \
-#    '/reg6/start_payment/' not in request.META['HTTP_REFERER']:
-#    return HttpResponseRedirect('/reg6/')
+  if 'HTTP_REFERER' not in request.META  or \
+    '/utoscreg/start_payment/' not in request.META['HTTP_REFERER']:
+    return HttpResponseRedirect('/utoscreg/')
 
   ScaleDebug(request.META)
   ScaleDebug(request.POST)
@@ -659,10 +659,10 @@ def FinishPayment(request):
   PAYMENT_STEP = 7
 
   if request.method != 'POST':
-    return HttpResponseRedirect('/reg6/')
+    return HttpResponseRedirect('/utoscreg/')
 #  if 'HTTP_REFERER' not in request.META  or \
-#    '/reg6/start_payment/' not in request.META['HTTP_REFERER']:
-#    return HttpResponseRedirect('/reg6/')
+#    '/utoscreg/start_payment/' not in request.META['HTTP_REFERER']:
+#    return HttpResponseRedirect('/utoscreg/')
 
   required_vars = [
     'address_name',
@@ -756,12 +756,12 @@ class HandleIPN(Endpoint):
     except models.TempOrder.DoesNotExist:
         raise HandleIPN.OrderUnknown("PayPal sent notification of an order from "\
             "%s that we do not have a record of." % data.get('payer_email'))
-
+    
     logging.debug("Order Data: %s", data)
     logging.debug("Temp Order Total: %s", temp_order.total())
     
     # Check the PayPal order data against our own
-    if data.get('mc_gross') != str(temp_order.total().quantize(decimal.Decimal(’.01′))):
+    if data.get('mc_gross') != str(temp_order.total().quantize(decimal.Decimal('.01'))):
         raise HandleIPN.OrderMismatch(
             "The details for order %s don't match our database." % data.get('txn_id'))
     
@@ -884,7 +884,7 @@ def CheckIn(request):
 
 def FinishCheckIn(request):
   if request.method != 'POST':
-    return HttpResponseRedirect('/reg6/')
+    return HttpResponseRedirect('/utoscreg/')
 
   required_vars = [
     'id',
@@ -914,10 +914,10 @@ def RedeemCoupon(request):
   PAYMENT_STEP = 7
 
   if request.method != 'POST':
-    return HttpResponseRedirect('/reg6/')
+    return HttpResponseRedirect('/utoscreg/')
   if 'HTTP_REFERER' not in request.META  or \
-    '/reg6/payment/' not in request.META['HTTP_REFERER']:
-    return HttpResponseRedirect('/reg6/')
+    '/utoscreg/payment/' not in request.META['HTTP_REFERER']:
+    return HttpResponseRedirect('/utoscreg/')
 
   required_vars = [
     'code',

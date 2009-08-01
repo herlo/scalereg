@@ -12,7 +12,7 @@ urlpatterns = patterns('',
     (r'^accounts/password_change/$', 'django.contrib.auth.views.password_change'),
     (r'^accounts/password_change/done/$', 'django.contrib.auth.views.password_change_done'),
     (r'^admin/', include('django.contrib.admin.urls')),
-    (r'^reg6/', include('scale.reg6.urls')),
+    (r'^utoscreg/', include('scale.reg6.urls')),
     (r'^reports/', include('scale.reports.urls')),
     (r'^speaker_survey/', include('scale.speaker_survey.urls')),
 
