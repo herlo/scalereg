@@ -21,7 +21,7 @@ class MyEndPoint(Endpoint):
         # Do something with invalid data (could be from anywhere) - you 
         # should probably log this somewhere
 
-These methods can optionally return an HttpResponse - if they dont, a 
+These methods can optionally return an HttpResponse - if they don't, a 
 default response will be sent.
 
 Then in urls.py:
@@ -56,76 +56,48 @@ Then in urls.py:
     'txn_type': 'send_money',
     'verify_sign': 'AOH.JxXLRThnyE4toeuh-.oeurch23.QyBY-O1N'
 }
-"""
 
+"""
 from django.http import HttpResponse
 import urllib
 import httplib
-import logging
-
-logging.basicConfig(
-    level = logging.DEBUG,
-    format = '%(asctime)s %(levelname)s %(message)s',
-    filename = '/tmp/scalereg.log',
-    filemode = 'w'
-)
 
 class Endpoint:
 
     default_response_text = 'Nothing to see here'
-    #verify_url = "https://www.paypal.com/cgi-bin/webscr"
+    verify_url = "https://www.paypal.com/cgi-bin/webscr"
+    sandbox_url = "https://www.sandbox.paypal.com/cgi-bin/webscr"
 
     # For debugging:
-    verify_url = "https://www.sandbox.paypal.com/cgi-bin/webscr"
-    httplib.HTTPConnection.debuglevel = 1
+    # httplib.HTTPConnection.debuglevel = 1
+    # verify_url = sandbox_url
 
     def do_post(self, url, args):
         return urllib.urlopen(url, urllib.urlencode(args)).read()
 
     def verify(self, data):
-            	logging.debug("verify function")
-		args = {
-		    'cmd': '_notify-validate',
-		}
-		args.update(data)
-		logging.debug("Args to PayPal:\n%s\n\n" % args)
-		
-		vData = self.do_post(self.verify_url, args)
-		logging.debug("Data from PayPal:\n%s\n\n" % vData)
-#		return self.do_post(self.verify_url, args) == 'VERIFIED'
-		return vData == 'VERIFIED'
-		
+        args = {
+            'cmd': '_notify-validate',
+        }
+        args.update(data)
+        return self.do_post(self.verify_url, args) == 'VERIFIED'
+
     def default_response(self):
         return HttpResponse(self.default_response_text)
 
     def __call__(self, request):
-    
-#        import pdb
-#        pdb.set_trace()
-        
         r = None
-        
         if request.method == 'POST':
-#            data = dict()
-#            for key, value in request.POST.items():
-#                logging.debug("key: %s value: %s", key, value)
-#                data[key] = value
             data = dict(request.POST.items())
-#            # We need to post that BACK to PayPal to confirm it
-            logging.debug("Data to PayPal:\n%s\n\n" % data)
-            
+            # We need to post that BACK to PayPal to confirm it
             if self.verify(data):
-                logging.debug("if verify data")
                 r = self.process(data)
             else:
-                logging.debug("data invalid")
                 r = self.process_invalid(data)
-
         if r:
             return r
         else:
             return self.default_response()
-
 
     def process(self, data):
         pass

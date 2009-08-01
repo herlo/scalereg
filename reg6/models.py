@@ -1,15 +1,8 @@
+import datetime
+import decimal
+
 from django.db import models
 from scale.reg6 import validators
-import datetime
-import logging
-
-logging.basicConfig(
-    level = logging.DEBUG,
-    format = '%(asctime)s %(levelname)s %(message)s',
-    filename = '/tmp/scalereg.log',
-    filemode = 'w'
-)
-
 
 # Create your models here.
 
@@ -314,13 +307,6 @@ class Attendee(models.Model):
   answers = models.ManyToManyField(Answer, blank=True, null=True,
     validator_list = [validators.isQuestionsUnique])
 
-  def total(self):
-    """Grab the aggregate order total -- in other words, the total amount due.
-
-    """
-    return sum([i.ticket_cost() for i in Attendee.objects.filter(
-        pk__in=self.attendees_list())])
-
   def ticket_cost(self):
     price_modifier = 1
     if self.promo:
@@ -355,13 +341,9 @@ class Attendee(models.Model):
   def __str__(self):
     return "%s (%s) " % (self.id, self.email)
 
-  def total(self):
-    """Grab the aggregate order total -- in other words, the total amount due.
-
-    """
-    return sum([i.ticket_cost() for i in self.attendees_list])
-
 class TempOrder(models.Model):
+  TWOPLACES = decimal.Decimal(10) ** -2
+
   order_num = models.CharField(maxlength=10, primary_key=True,
     validator_list = [validators.isValidOrderNumber],
     help_text='Unique 10 upper-case letters + numbers code')
@@ -372,30 +354,24 @@ class TempOrder(models.Model):
   def attendees_list(self):
     y = list()
     if self.attendees.find(',') != -1:
-    	for x in self.attendees.split(','):
-    		y.append(x)
+      for x in self.attendees.split(','):
+        y.append(x)
     else:
-        y.append(self.attendees)
+      y.append(self.attendees)
 
     return y
-	
-  def total(self):
-    """Grab the aggregate order total -- in other words, the total amount due.
-    
-    """
-    list = self.attendees_list()
-    logging.debug("Attendee ids:\n%s\n\n" % list )
-    
-    sum = 0
-    for i in list:
-        sum += Attendee.objects.get(id=i).ticket_cost()
 
-    return sum
-#    return sum([Attendee.objects.get(id=i).ticket_cost() for i in self.attendees_list])
-	
+  def total(self):
+    """Grab the total amount due for this order."""
+    total = sum(
+        [i.ticket_cost()
+          for i in Attendee.objects.filter(id__in=self.attendees_list())]
+    )
+    return decimal.Decimal(str(total)).quantize(self.TWOPLACES)
+
   def __str__(self):
     return "%s" % self.order_num
-  
+
   class Admin:
     pass
 
@@ -424,3 +400,5 @@ class Coupon(models.Model):
 
   class Meta:
     permissions = (('view_coupon', 'Can view coupon'),)
+
+# vim:softtabstop=2:shiftwidth=2
