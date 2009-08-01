@@ -82,37 +82,33 @@ def CashPayment(request):
 
   tickets = []
   try:
-    tickets.append(models.Ticket.objects.get(name='7XSVN'))
+    tickets.append(models.Ticket.objects.get(name='STDRG'))
   except:
     pass
   try:
-    tickets.append(models.Ticket.objects.get(name='OSSE'))
+    tickets.append(models.Ticket.objects.get(name='EXPST'))
   except:
     pass
   try:
-    tickets.append(models.Ticket.objects.get(name='WIOS'))
+    tickets.append(models.Ticket.objects.get(name='THUST'))
   except:
     pass
-  try:
-    tickets.append(models.Ticket.objects.get(name='6XE1'))
-  except:
-    pass
-  try:
-    tickets.append(models.Ticket.objects.get(name='6XF2'))
-  except:
-    pass
-  try:
-    tickets.append(models.Ticket.objects.get(name='7XSTD'))
-  except:
-    pass
-  try:
-    tickets.append(models.Ticket.objects.get(name='7XKID'))
-  except:
-    pass
-  try:
-    tickets.append(models.Ticket.objects.get(name='T1'))
-  except:
-    pass
+#  try:
+#    tickets.append(models.Ticket.objects.get(name='6XF2'))
+#  except:
+#    pass
+#  try:
+#    tickets.append(models.Ticket.objects.get(name='7XSTD'))
+#  except:
+#    pass
+#  try:
+#    tickets.append(models.Ticket.objects.get(name='7XKID'))
+#  except:
+#    pass
+#  try:
+#    tickets.append(models.Ticket.objects.get(name='T1'))
+#  except:
+#    pass
 
   if request.method == 'GET':
     return render_to_response('reg6/staff/cash.html',

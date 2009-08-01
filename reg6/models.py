@@ -38,7 +38,7 @@ TICKET_CHOICES = (
   ('speaker', 'Speaker'),
   ('exhibitor', 'Exhibitor'),
   ('staff', 'Staff'),
-  ('friday', 'Friday Only'),
+  ('thursday', 'Thursday Only'),
 )
 
 class Order(models.Model):
