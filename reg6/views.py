@@ -173,8 +173,8 @@ def kiosk_index(request):
   response.write("""<html><head></head>
   <body>
   <div align="center">
-  <h1>Welcome to SCALE 6X</h1>
-  <h1>February 8 - 10, 2008</h1>
+  <h1>Welcome to UTOSC 2009</h1>
+  <h1>October 8 - 10, 2009</h1>
 
   <hr noshade width="60%">
 
@@ -189,7 +189,7 @@ def kiosk_index(request):
   </form>
   </td>
   <td valign="top">
-  If you already registered with SCALE<br />
+  If you already registered with UTOSC<br />
   and would like to pick up your badge.
   </td>
   </tr>
@@ -200,7 +200,7 @@ def kiosk_index(request):
   <input type="hidden" name="kiosk" value="0">
   </form>
   </td>
-  <td valign="top">If you have not registered with SCALE.</td>
+  <td valign="top">If you have not registered with UTOSC</td>
   </tr>
   </table>
 
@@ -652,9 +652,9 @@ def FinishPayment(request):
 
   if request.method != 'POST':
     return HttpResponseRedirect('/utoscreg/')
-#  if 'HTTP_REFERER' not in request.META  or \
-#    '/utoscreg/start_payment/' not in request.META['HTTP_REFERER']:
-#    return HttpResponseRedirect('/utoscreg/')
+  if 'HTTP_REFERER' not in request.META  or \
+    '/utoscreg/start_payment/' not in request.META['HTTP_REFERER']:
+    return HttpResponseRedirect('/utoscreg/')
 
   required_vars = [
     'address_name',
