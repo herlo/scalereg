@@ -734,7 +734,7 @@ class HandleIPN(Endpoint):
     """Notification from PayPal that the transaction went through, didn't go
     through, or may be going through later.
 
-    It is important to double-check the price, txn_id, payer_email, and any
+    It is important to double-check the price, invoice, payer_email, and any
     other important data coming from PayPal to make sure that no tampering has
     been done since we first sent the user off to PayPal.
 
@@ -742,8 +742,16 @@ class HandleIPN(Endpoint):
     that the registration payment is complete.
 
     """
+    # Make sure PayPal isn't sending us an order we've already processed
+    # due to lag/mistake/act-of-god
     try:
-      temp_order = models.TempOrder.objects.get(order_num=data.get('txn_id'))
+      models.Order.objects.get(auth_code=data.get('txn_id'))
+      return HttpResponse("Alright")
+    except models.Order.DoesNotExist:
+      pass
+
+    try:
+      temp_order = models.TempOrder.objects.get(order_num=data.get('invoice'))
     except models.TempOrder.DoesNotExist:
       raise HandleIPN.OrderUnknown("PayPal sent notification of an order from "\
             "%s that we do not have a record of." % data.get('payer_email'))
@@ -752,12 +760,12 @@ class HandleIPN(Endpoint):
     total = decimal.Decimal(str(data.get('mc_gross'))).quantize(models.TempOrder.TWOPLACES)
     if total != temp_order.total():
       raise HandleIPN.OrderMismatch(
-          "The details for order %s don't match our database." % data.get('txn_id'))
+          "The details for order %s don't match our database." % data.get('invoice'))
 
     if data.get('payment_status') == 'Completed':
       # Looks ok, make a real order and notify the user
       obj_dict = {
-        'order_num': data.get('txn_id'),
+        'order_num': data.get('invoice'),
         'name': " ".join([data.get('first_name'), data.get('last_name')]),
         'address':  '',
         'city': '',
@@ -768,6 +776,7 @@ class HandleIPN(Endpoint):
         'phone': '',
         'amount': float(total),
         'payment_type': 'paypal',
+        'auth_code': data.get('txn_id'),
       }
 
       order = models.Order.objects.create(**obj_dict)

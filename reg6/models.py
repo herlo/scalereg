@@ -59,7 +59,7 @@ class Order(models.Model):
     validator_list = [validators.isNotNegative])
   payment_type = models.CharField(maxlength=10, choices=PAYMENT_CHOICES)
   auth_code = models.CharField(maxlength=30, blank=True,
-    help_text='Only used by Verisign')
+    help_text='Only used by Verisign and PayPal (txn_id)')
   resp_msg = models.CharField(maxlength=60, blank=True,
     help_text='Only used by Verisign')
   result = models.CharField(maxlength=60, blank=True,
