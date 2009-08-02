@@ -785,6 +785,7 @@ class HandleIPN(Endpoint):
       for i in models.Attendee.objects.filter(
           id__in=temp_order.attendees_list()):
         i.order = order
+        i.valid = True
         i.save()
 
       send_mail('Your order is complete', """Congrats, your registration is
