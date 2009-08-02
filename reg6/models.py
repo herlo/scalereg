@@ -238,7 +238,7 @@ class Item(models.Model):
 
 class Answer(models.Model):
   question = models.ForeignKey("Question", edit_inline=models.TABULAR,
-    num_in_admin=3)
+    num_in_admin=10)
   text = models.CharField(maxlength=200, core=True)
 
   class Admin:
