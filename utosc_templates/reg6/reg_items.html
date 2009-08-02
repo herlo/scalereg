@@ -21,12 +21,13 @@
     Would you like to add any additional items?
     </p>
 
-    <table border="1">
+    <table border="1" width="750">
     <thead>
     <tr>
         <th>&nbsp;</th>
-        <th>Item</th>
+        <th width="18%">Item</th>
         <th>Price</th>
+		<th width="60%">More Information</th>
     </tr>
     </thead>
     <tbody>
@@ -35,6 +36,7 @@
         <td><input type="checkbox" name="item{{ forloop.counter0 }}" value="{{ item.name|escape }}" /></td>
         <td>{{ item.description|escape }}</td>
         <td>{{ item.price|money|escape }}</td>
+        <td>{{ item.more_info|linebreaks }}</td>
         </tr>
     {% endfor %}
     </tbody>
