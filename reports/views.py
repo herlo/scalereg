@@ -46,7 +46,10 @@ class Count:
     self.percentage = 0
 
   def CalcPercentage(self, total):
-    self.percentage = 100 * round(self.count / float(total), 3)
+    if total == None or float(total) == 0:
+        self.percentage = 0
+    else:
+        self.percentage = 100 * round(self.count / float(total), 3)
 
 
 class Attendee(Count):
