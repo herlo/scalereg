@@ -782,8 +782,10 @@ class HandleIPN(Endpoint):
       order = models.Order.objects.create(**obj_dict)
 
       # Associate all the attendees with this order
-      models.Attendee.objects.filter(
-          id__in=temp_order.attendees_list()).update(order=order)
+      for i in models.Attendee.objects.filter(
+          id__in=temp_order.attendees_list()):
+        i.order = order
+        i.save()
 
       send_mail('Your order is complete', """Congrats, your registration is
             complete, payed for, and we love you (now).""",
