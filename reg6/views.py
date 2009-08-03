@@ -652,9 +652,9 @@ def FinishPayment(request):
 
   if request.method != 'POST':
     return HttpResponseRedirect('/utoscreg/')
-  if 'HTTP_REFERER' not in request.META  or \
-    '/utoscreg/start_payment/' not in request.META['HTTP_REFERER']:
-    return HttpResponseRedirect('/utoscreg/')
+#  if 'HTTP_REFERER' not in request.META  or \
+#    '/utoscreg/start_payment/' not in request.META['HTTP_REFERER']:
+#    return HttpResponseRedirect('/utoscreg/')
 
   required_vars = [
     'address_name',
