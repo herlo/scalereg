@@ -789,14 +789,17 @@ class HandleIPN(Endpoint):
         i.valid = True
         i.save()
 
-      send_mail('Your order is complete', """Congrats, your registration is
-            complete, payed for, and we love you (now).""",
+      send_mail('Your order is complete', """Thank you for registering for the Utah Open Source Conference 2009""",
             settings.DEFAULT_FROM_EMAIL, [data.get('payer_email')])
+
+      # we need to send an email to the managers too
+      mail_managers('Your order is complete',  
+          """%s just registered for the Utah Open Source Conference 2009""" % data.get('payer_email'), True)
 
     elif data.get('payment_status') == 'Failed':
       # Notify the user that payment did not go through
       send_mail('Your order is not complete', """Crap! There was a problem
-            processing your order, please log in and try again.""",
+            processing your order, please try again.""",
             settings.DEFAULT_FROM_EMAIL, [data.get('payer_email')])
 
     elif data.get('payment_status') == 'Pending':
