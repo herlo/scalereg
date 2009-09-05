@@ -4,11 +4,17 @@
 {% block content %}
 <div id="content-main">
 
-{% if attendees and total %}
+{% if attendees %}
     <br />
+	{% if total %}
     <h2>
     You are paying for the following attendee(s):
     </h2>
+	{% else %}
+    <h2>
+    The following attendees will be confirmed:
+    </h2>
+	{% endif %}
 
     <p>
     <table border="1">
@@ -37,6 +43,7 @@
     Total: {{ total|money|escape }}
     </p>
 
+{% if total %}
     <h2>Payment</h2>
 <!--
             	<form method="POST" action="https://sandbox.google.com/api/checkout/v2/checkoutForm/Merchant/739947327946302" accept-charset="utf-8">
@@ -88,6 +95,20 @@
     <input type="submit" value="Redeem" />
     </p>
     </form>
+	
+{% else %}
+    {% for person in attendees %}
+		{% if forloop.first %}
+			<form method="post" action="../../finish_payment/free/">
+			<input type="hidden" name="address_name" value="{{ person.first_name|escape }} {{ person.last_name|escape }}" />
+			<input type="hidden" name="payer_email" value="{{ person.email|escape }}" />
+			<input type="hidden" name="mc_gross" value="{{ total|escape }}" />
+			<input type="hidden" name="invoice" value="{{ order|escape }}" />
+			<input type="submit" value="Complete Order" />
+			</form>
+		{% endif %}
+	{% endfor %}
+{% endif %}
 
     <h2>Other Options:</h2>
 

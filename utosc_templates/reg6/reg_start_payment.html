@@ -4,8 +4,8 @@
 {% block content %}
 <div id="content-main">
 
-<br />
 {% if bad_attendee %}
+	<br />
     <h2>Attendee Not Found</h2>
     <p>
     <table border="1">
@@ -69,17 +69,15 @@
     </tr>
     </tbody>
     </table>
-    <br />
     </p>
 {% endif %}
 
-{% if attendees and total %}
-    <h2>
-    <br />
-    You are paying for the following attendee(s):
-    <br />
-    <br />
-    </h2>
+{% if attendees %}
+	{% if total %}
+    <h2>You are paying for the following attendee(s): </h2>
+	{% else %}
+    <h2>You are confirming the following attendee(s): </h2>
+	{% endif %}
 
     <table border="1">
     <thead>
@@ -92,7 +90,7 @@
     </tr>
     </thead>
     <tbody>
-    {% for person  in attendees %}
+    {% for person in attendees %}
     <tr>
         <td>{{ person.id|escape }}</td>
         <td>{{ person.first_name|escape }} {{ person.last_name|escape }}</td>
@@ -113,21 +111,23 @@
     Total: {{ total|money|escape }}
     </p>
 
-{% if attendees and total %}
+      <p>
+      If you are ready to pay for the above attendee(s), click "Pay For This Order" to continue.
+      </p>
+  
+      <p>
+  {% if not total %}
+		<form method="post" action="../payment/free/">
+		<input type="submit" value="Continue Order" />
+  {% else %}
+		<form method="post" action="../payment/">
+		<input type="submit" value="Pay For This Order" />
+  {% endif %}
 
-    <p>
-    If you are ready to pay for the above attendee(s), click "Pay For This Order" to continue.
-    </p>
-
-    <p>
-    <form method="post" action="../payment/">
-    <input type="submit" value="Pay For This Order" />
-    </form>
-    <br />
-    </p>
-    <h2>Pay for additional attendees:</h2>
-
-{% endif %}
+      </form>
+      <br />
+      </p>
+      <h2>Pay for additional attendees:</h2>
 
     <p>
     If you want to pay for more attendees at once, use the 'add attendee' form here.

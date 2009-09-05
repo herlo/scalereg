@@ -7,7 +7,7 @@ from django.core.mail import send_mail, mail_managers
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseServerError
 from django.shortcuts import render_to_response
 
-import datetime
+from datetime import date, datetime
 import random
 import re
 import string
@@ -391,7 +391,7 @@ def RegisteredAttendee(request):
 
 def StartPayment(request):
   PAYMENT_STEP = 5
-
+  
   if 'payment' not in request.session:
     request.session['payment'] = []
 
@@ -473,7 +473,7 @@ def StartPayment(request):
     })
 
 
-def Payment(request):
+def Payment(request, free=None):
   PAYMENT_STEP = 6
 
   if request.method != 'POST':
@@ -647,7 +647,7 @@ def FailedPayment(request):
     })
 
 
-def FinishPayment(request):
+def FinishPayment(request, free=None):
   PAYMENT_STEP = 7
 
   if request.method != 'POST':
@@ -668,22 +668,47 @@ def FinishPayment(request):
     return r
 
   try:
-    print "Invoice: " + request.POST['invoice']
     order = models.Order.objects.get(order_num=request.POST['invoice'])
     all_attendees_data = models.Attendee.objects.filter(order=order.order_num)
   except models.Order.DoesNotExist:
     try:
-        order = models.TempOrder.objects.get(order_num=request.POST['invoice'])
-        attendee_list = order.attendees_list()
-        all_attendees_data = list()
-        for attendee in attendee_list:
-            a = models.Attendee.objects.get(id=attendee)
-            all_attendees_data.append(a)
-            send_mail('UTOSC 2009 Attendee Registration', """Thank you for registering for the Utah Open Source Conference 2009.  This is to confirm you have completed registration.""", settings.DEFAULT_FROM_EMAIL, [a.email])
+      temp_order = models.TempOrder.objects.get(order_num=request.POST['invoice'])
+      attendee_list = temp_order.attendees_list()
+      all_attendees_data = list()
+      for attendee in attendee_list:
+        a = models.Attendee.objects.get(id=attendee)
+        all_attendees_data.append(a)
     except models.TempOrder.DoesNotExist:
-        ScaleDebug('Your order cannot be found')
-        return HttpResponseServerError('Your order cannot be found')
+      ScaleDebug('Your order cannot be found')
+      return HttpResponseServerError('Your order cannot be found')
 
+    if free:
+      auth_date = date.today().strftime("%Y%m%d%g%i")
+      obj_dict = {
+        'order_num': request.POST['invoice'],
+        'name': request.POST['address_name'],
+        'address':  '123 Free Street',
+        'city': 'Free',
+        'state': 'UT',
+        'zip': '84070',
+        'country': 'USA',
+        'email': request.POST['payer_email'],
+        'phone': '',
+        'valid': True,
+        'amount': float(request.POST['mc_gross']),
+        'payment_type': 'promo',
+        'auth_code': auth_date + str(request.POST['invoice'])
+      }
+      order = models.Order.objects.create(**obj_dict)
+
+      # Associate all the attendees with this order
+      for i in models.Attendee.objects.filter(
+          id__in=temp_order.attendees_list()):
+        i.order = order
+        i.valid = True
+        i.save()
+
+    send_mail('UTOSC 2009 Attendee Registration', """Thank you for registering for the Utah Open Source Conference 2009.  This is to confirm you have completed registration.""", settings.DEFAULT_FROM_EMAIL, [a.email])
 
   return scale_render_to_response(request, 'reg6/reg_receipt.html',
     {'title': 'Registration Payment Receipt',
@@ -695,7 +720,6 @@ def FinishPayment(request):
      'steps_total': STEPS_TOTAL,
      'total': request.POST['mc_gross'],
     })
-
 
 class HandleIPN(Endpoint):
   """Handle IPN messages sent from PayPal once a user completes payment."""
