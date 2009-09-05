@@ -677,8 +677,9 @@ def FinishPayment(request):
         attendee_list = order.attendees_list()
         all_attendees_data = list()
         for attendee in attendee_list:
-            print "attendee: " + str(attendee)
-            all_attendees_data.append(models.Attendee.objects.get(id=attendee))
+            a = models.Attendee.objects.get(id=attendee)
+            all_attendees_data.append(a)
+            send_mail('UTOSC 2009 Attendee Registration', """Thank you for registering for the Utah Open Source Conference 2009.  This is to confirm you have completed registration.""", settings.DEFAULT_FROM_EMAIL, [a.email])
     except models.TempOrder.DoesNotExist:
         ScaleDebug('Your order cannot be found')
         return HttpResponseServerError('Your order cannot be found')
@@ -972,6 +973,8 @@ def RedeemCoupon(request):
       attendee = models.Attendee.objects.get(id=id)
       if not attendee.valid:
         all_attendees_data.append(attendee)
+        send_mail('Your order is complete', """Thank you for registering for the Utah Open Source Conference 2009""", settings.DEFAULT_FROM_EMAIL, [attendee.email])
+
     except models.Attendee.DoesNotExist:
       return HttpResponseServerError('cannot find an attendee')
 

@@ -212,7 +212,7 @@ class Item(models.Model):
     validator_list = [validators.isAllCapsDigits],
     help_text='Unique, up to 4 upper-case letters / numbers')
   description = models.CharField(maxlength=60)
-  more_info = models.TextField(maxlength=255, blank=True,null=True,
+  more_info = models.TextField(maxlength=555, blank=True,null=True,
       help_text='Please use no more than 2 short paragraphs of text')
 
   price = models.FloatField(max_digits=5, decimal_places=2,

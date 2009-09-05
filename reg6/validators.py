@@ -9,7 +9,7 @@ def isValidStartStopDates(field_data, all_data):
 
 
 def isPositive(field_data, all_data):
-  if float(field_data) <= 0:
+  if float(field_data) < 0:
     raise validators.ValidationError('Value should be positive')
 
 
